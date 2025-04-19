@@ -2,8 +2,8 @@ export interface SupportCase {
     id: string;
     title: string;
     description: string;
-    status: 'open' | 'in-progress' | 'resolved' | 'closed';
-    priority: 'low' | 'medium' | 'high';
+    status: 'pendiente' | 'completado' | 'en_proceso' | 'rechazado' | 'en_pausa';
+    priority: 'baja' | 'media' | 'alta';
     created_at: string;
     updated_at: string;
     execution_result: string
