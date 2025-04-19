@@ -42,4 +42,14 @@ export interface SupportCase {
     MEDIUM = 'media',
     HIGH = 'alta'
   }
+
+  export interface GetSupportCasesParams {
+    page?: number;
+    size?: number;
+    id?: string;
+    status?: string;
+    priority?: string;
+    start_date?: string;
+    end_date?: string;
+  }
   

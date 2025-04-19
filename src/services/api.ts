@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { SupportCase, SupportCaseResponsePagination } from '../types/supportCase';
+import { SupportCase, SupportCaseResponsePagination, GetSupportCasesParams } from '../types/supportCase';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 export const createSupportCase = async (caseData: Omit<SupportCase, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => {
@@ -7,9 +7,31 @@ export const createSupportCase = async (caseData: Omit<SupportCase, 'id' | 'crea
   return response.data;
 };
 
-export const getSupportCases = async (page: number = 1, limit: number = 10) => {
+export const getSupportCases = async (params: GetSupportCasesParams = {}) => {
+  // Set default values if not provided
+  const {
+    page = 1,
+    size = 10,
+    id = '',
+    status = '',
+    priority = '',
+    start_date = '',
+    end_date = ''
+  } = params;
+
+  // Build query string
+  const queryParams = new URLSearchParams();
+  queryParams.append('page', page.toString());
+  queryParams.append('size', size.toString());
+
+  if (id) queryParams.append('id', id);
+  if (status) queryParams.append('status', status);
+  if (priority) queryParams.append('priority', priority);
+  if (start_date) queryParams.append('start_date', start_date);
+  if (end_date) queryParams.append('end_date', end_date);
+
   const response = await axios.get<SupportCaseResponsePagination>(
-    `${API_BASE_URL}/support-cases/?page=${page}&size=${limit}`
+    `${API_BASE_URL}/support-cases/?${queryParams.toString()}`
   );
   
   return {
@@ -19,6 +41,5 @@ export const getSupportCases = async (page: number = 1, limit: number = 10) => {
     pageSize: response.data.page,
     success: response.data.success,
     message: response.data.message,
-
   };
 };

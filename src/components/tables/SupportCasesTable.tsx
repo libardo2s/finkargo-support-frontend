@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
-import { Table, Button, Spinner } from 'react-bootstrap';
-import { format } from 'date-fns';
+import React, { useMemo, useState, useEffect } from 'react';
+import { Table, Button, Spinner, Form, Row, Col } from 'react-bootstrap';
+import { format, parseISO } from 'date-fns';
 import PaginationComponent from './Pagination';
 import SupportCaseDetails from '../modals/SupportCaseDetails';
 import { SupportCase } from '../../types/supportCase';
@@ -14,7 +14,9 @@ interface SupportCasesTableProps {
   pageSize: number;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
+  onFilterChange: (filters: any) => void;
   loading?: boolean;
+  onSearch: () => void;
 }
 
 const statusBadgeColors: Record<string, string> = {
@@ -57,10 +59,19 @@ export default function SupportCasesTable({
   pageSize,
   onPageChange,
   onPageSizeChange,
+  onFilterChange,
+  onSearch,
   loading = false
 }: SupportCasesTableProps) {
   const [selectedCase, setSelectedCase] = useState<SupportCase | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [filters, setFilters] = useState({
+    id: '',
+    status: '',
+    priority: '',
+    startDate: '',
+    endDate: ''
+  });
 
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
@@ -75,6 +86,19 @@ export default function SupportCasesTable({
     setSelectedCase(null);
   };
 
+  const handleFilterChange = (e: any) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  useEffect(() => {
+    // Add debounce here if needed
+    onFilterChange(filters);
+  }, [filters, onFilterChange]);
+
   const caseRows = useMemo(() => {
     return cases.map((supportCase) => (
       <tr key={supportCase.id} className="align-middle">
@@ -83,14 +107,14 @@ export default function SupportCasesTable({
         </td>
         <td>{supportCase.title}</td>
         <td>
-          <span 
+          <span
             className={`badge bg-${statusBadgeColors[supportCase.status] || 'primary'} text-capitalize`}
           >
             {supportCase.status}
           </span>
         </td>
         <td>
-          <span 
+          <span
             className={`badge bg-${priorityBadgeColors[supportCase.priority] || 'primary'} text-capitalize`}
           >
             {supportCase.priority}
@@ -98,12 +122,12 @@ export default function SupportCasesTable({
         </td>
         <td>
           <small className="text-muted">
-            {format(new Date(supportCase.created_at), 'MMM dd, yyyy')}
+            {format(parseISO(supportCase.created_at), 'MMM dd, yyyy')}
           </small>
         </td>
         <td className="text-center">
-          <Button 
-            variant="outline-primary" 
+          <Button
+            variant="outline-primary"
             size="sm"
             onClick={() => handleShowDetails(supportCase)}
             className="px-3"
@@ -117,12 +141,97 @@ export default function SupportCasesTable({
 
   return (
     <div className="mt-3">
+      <div className="bg-light p-3 mb-3 rounded">
+        <h5 className="mb-3">Filtros</h5>
+        <Row>
+          <Col md={3}>
+            <Form.Group controlId="filterId">
+              <Form.Label>ID</Form.Label>
+              <Form.Control
+                type="text"
+                name="id"
+                value={filters.id}
+                onChange={handleFilterChange}
+                placeholder="Buscar por ID"
+              />
+            </Form.Group>
+          </Col>
+          <Col md={2}>
+            <Form.Group controlId="filterStatus">
+              <Form.Label>Estado</Form.Label>
+              <Form.Select
+                name="status"
+                value={filters.status}
+                onChange={handleFilterChange}
+              >
+                <option value="">Todos</option>
+                <option value="open">Abierto</option>
+                <option value="in-progress">En progreso</option>
+                <option value="resolved">Resuelto</option>
+                <option value="closed">Cerrado</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col md={2}>
+            <Form.Group controlId="filterPriority">
+              <Form.Label>Prioridad</Form.Label>
+              <Form.Select
+                name="priority"
+                value={filters.priority}
+                onChange={handleFilterChange}
+              >
+                <option value="">Todas</option>
+                <option value="low">Baja</option>
+                <option value="medium">Media</option>
+                <option value="high">Alta</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col md={3}>
+            <Form.Group controlId="filterDateRange">
+              <Form.Label>Rango de fechas</Form.Label>
+              <Row>
+                <Col>
+                  <Form.Control
+                    type="date"
+                    name="startDate"
+                    value={filters.startDate}
+                    onChange={handleFilterChange}
+                    placeholder="Desde"
+                  />
+                </Col>
+                <Col>
+                  <Form.Control
+                    type="date"
+                    name="endDate"
+                    value={filters.endDate}
+                    onChange={handleFilterChange}
+                    placeholder="Hasta"
+                  />
+                </Col>
+              </Row>
+            </Form.Group>
+          </Col>
+          <Col md={2} className="d-flex align-items-end">
+            <Button
+              variant="primary"
+              onClick={onSearch}
+              disabled={loading}
+              className="w-100"
+            >
+              <i className="bi bi-search me-2"></i>
+              Buscar
+            </Button>
+          </Col>
+        </Row>
+      </div>
+
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div className="text-muted small">
           Mostrando {startItem} a {endItem} de {totalItems} casos
         </div>
       </div>
-      
+
       <div className="table-responsive rounded border">
         <Table hover className="mb-0">
           <thead className="table-light">
@@ -159,7 +268,7 @@ export default function SupportCasesTable({
         />
       </div>
 
-      <SupportCaseDetails 
+      <SupportCaseDetails
         show={showDetails}
         onHide={handleCloseDetails}
         supportCase={selectedCase}
