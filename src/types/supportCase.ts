@@ -6,6 +6,11 @@ export interface SupportCase {
     priority: 'low' | 'medium' | 'high';
     created_at: string;
     updated_at: string;
+    execution_result: string
+    database_name: string;
+    schema_name: string
+    sql_query: string
+    executed_by: string
   }
   
   export interface CreateSupportCaseDto {
@@ -23,3 +28,18 @@ export interface SupportCase {
     items: SupportCase[];
     total_pages: number;
   }
+
+  export enum CaseStatus {
+    PENDING = "pendiente",
+    COMPLETED = "completado",
+    IN_PROGRESS = "en_proceso",
+    REJECTED = "rechazado",
+    ON_HOLD = "en_pausa"
+  }
+  
+  export enum CasePriority {
+    LOW = 'baja',
+    MEDIUM = 'media',
+    HIGH = 'alta'
+  }
+  

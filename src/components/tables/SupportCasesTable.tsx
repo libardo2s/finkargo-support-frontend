@@ -1,22 +1,10 @@
-import React, { useMemo } from 'react';
-import { Table } from 'react-bootstrap';
+import React, { useMemo, useState } from 'react';
+import { Table, Button, Spinner } from 'react-bootstrap';
 import { format } from 'date-fns';
 import PaginationComponent from './Pagination';
+import SupportCaseDetails from '../modals/SupportCaseDetails';
 import { SupportCase } from '../../types/supportCase';
-
-export enum CaseStatus {
-  PENDING = "pendiente",
-  COMPLETED = "completado",
-  IN_PROGRESS = "en_proceso",
-  REJECTED = "rechazado",
-  ON_HOLD = "en_pausa"
-}
-
-export enum CasePriority {
-  LOW = 'baja',
-  MEDIUM = 'media',
-  HIGH = 'alta'
-}
+import { CaseStatus, CasePriority } from '../../types/supportCase';
 
 interface SupportCasesTableProps {
   cases: SupportCase[];
@@ -29,41 +17,37 @@ interface SupportCasesTableProps {
   loading?: boolean;
 }
 
+const statusBadgeColors: Record<string, string> = {
+  [CaseStatus.PENDING]: 'info',
+  [CaseStatus.ON_HOLD]: 'warning',
+  [CaseStatus.COMPLETED]: 'success',
+  [CaseStatus.IN_PROGRESS]: 'secondary',
+  [CaseStatus.REJECTED]: 'danger'
+};
+
+const priorityBadgeColors: Record<string, string> = {
+  [CasePriority.LOW]: 'success',
+  [CasePriority.MEDIUM]: 'warning',
+  [CasePriority.HIGH]: 'danger'
+};
+
 const EmptyState = () => (
   <tr>
-    <td colSpan={5} className="text-center text-muted py-4">
-      No cases found
+    <td colSpan={6} className="text-center text-muted py-4">
+      <i className="bi bi-inbox fs-4"></i>
+      <p className="mt-2 mb-0">No se encontraron casos</p>
     </td>
   </tr>
 );
 
 const LoadingState = () => (
   <tr>
-    <td colSpan={5} className="text-center text-muted py-4">
-      Loading cases...
+    <td colSpan={6} className="text-center text-muted py-4">
+      <Spinner animation="border" size="sm" className="me-2" />
+      Cargando casos...
     </td>
   </tr>
 );
-
-function getStatusBadgeColor(status: string): string {
-  switch(status.toLowerCase()) {
-    case CaseStatus.PENDING: return 'info';
-    case CaseStatus.ON_HOLD: return 'warning';
-    case CaseStatus.COMPLETED: return 'success';
-    case CaseStatus.IN_PROGRESS: return 'secondary';
-    case CaseStatus.REJECTED: return 'danger';
-    default: return 'primary';
-  }
-}
-
-function getPriorityBadgeColor(priority: string): string {
-  switch(priority.toLowerCase()) {
-    case CasePriority.LOW: return 'success';
-    case CasePriority.MEDIUM: return 'warning';
-    case CasePriority.HIGH: return 'danger';
-    default: return 'primary';
-  }
-}
 
 export default function SupportCasesTable({
   cases,
@@ -75,59 +59,93 @@ export default function SupportCasesTable({
   onPageSizeChange,
   loading = false
 }: SupportCasesTableProps) {
+  const [selectedCase, setSelectedCase] = useState<SupportCase | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
+
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
+  const handleShowDetails = (supportCase: SupportCase) => {
+    setSelectedCase(supportCase);
+    setShowDetails(true);
+  };
+
+  const handleCloseDetails = () => {
+    setShowDetails(false);
+    setSelectedCase(null);
+  };
+
   const caseRows = useMemo(() => {
     return cases.map((supportCase) => (
-      <tr key={supportCase.id}>
-        <td className="text-truncate" style={{ maxWidth: '250px' }} title={supportCase.id}>
+      <tr key={supportCase.id} className="align-middle">
+        <td className="text-truncate" style={{ maxWidth: '200px' }} title={supportCase.id}>
           {supportCase.id}
         </td>
         <td>{supportCase.title}</td>
         <td>
-          <span className={`badge bg-${getStatusBadgeColor(supportCase.status)}`}>
+          <span 
+            className={`badge bg-${statusBadgeColors[supportCase.status] || 'primary'} text-capitalize`}
+          >
             {supportCase.status}
           </span>
         </td>
         <td>
-          <span className={`badge bg-${getPriorityBadgeColor(supportCase.priority)}`}>
+          <span 
+            className={`badge bg-${priorityBadgeColors[supportCase.priority] || 'primary'} text-capitalize`}
+          >
             {supportCase.priority}
           </span>
         </td>
-        <td>{format(new Date(supportCase.created_at), 'MMM dd, yyyy HH:mm')}</td>
+        <td>
+          <small className="text-muted">
+            {format(new Date(supportCase.created_at), 'MMM dd, yyyy')}
+          </small>
+        </td>
+        <td className="text-center">
+          <Button 
+            variant="outline-primary" 
+            size="sm"
+            onClick={() => handleShowDetails(supportCase)}
+            className="px-3"
+          >
+            <i className="bi bi-eye me-1"></i> Ver
+          </Button>
+        </td>
       </tr>
     ));
   }, [cases]);
 
   return (
-    <div className="mt-4">
-      <div className="mb-3">
-        <span className="text-muted">
-          {startItem} a {endItem} de {totalItems} casos
-        </span>
+    <div className="mt-3">
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <div className="text-muted small">
+          Mostrando {startItem} a {endItem} de {totalItems} casos
+        </div>
       </div>
       
-      <Table striped bordered hover responsive className="mt-2">
-        <thead className="thead-dark">
-          <tr>
-            <th>ID</th>
-            <th>Titulo</th>
-            <th>Estado</th>
-            <th>Priridad</th>
-            <th>Fecha de creacion</th>
-          </tr>
-        </thead>
-        <tbody>
-          {loading ? (
-            <LoadingState />
-          ) : cases.length > 0 ? (
-            caseRows
-          ) : (
-            <EmptyState />
-          )}
-        </tbody>
-      </Table>
+      <div className="table-responsive rounded border">
+        <Table hover className="mb-0">
+          <thead className="table-light">
+            <tr>
+              <th style={{ width: '15%' }}>ID</th>
+              <th style={{ width: '30%' }}>Título</th>
+              <th style={{ width: '15%' }}>Estado</th>
+              <th style={{ width: '15%' }}>Prioridad</th>
+              <th style={{ width: '15%' }}>Fecha</th>
+              <th style={{ width: '10%' }} className="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <LoadingState />
+            ) : cases.length > 0 ? (
+              caseRows
+            ) : (
+              <EmptyState />
+            )}
+          </tbody>
+        </Table>
+      </div>
 
       <div className="d-flex justify-content-between align-items-center mt-3">
         <PaginationComponent
@@ -140,6 +158,12 @@ export default function SupportCasesTable({
           disabled={loading}
         />
       </div>
+
+      <SupportCaseDetails 
+        show={showDetails}
+        onHide={handleCloseDetails}
+        supportCase={selectedCase}
+      />
     </div>
   );
 }
