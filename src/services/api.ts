@@ -1,21 +1,6 @@
 import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:3001/api'; // Adjust to your backend URL
-
-interface ApiResponse<T> {
-  data: T;
-  totalPages: number;
-}
-
-export interface SupportCase {
-  id: string;
-  title: string;
-  description: string;
-  status: 'open' | 'in-progress' | 'resolved' | 'closed';
-  priority: 'low' | 'medium' | 'high';
-  createdAt: string;
-  updatedAt: string;
-}
+import { SupportCase, SupportCaseResponsePagination } from '../types/supportCase';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 export const createSupportCase = async (caseData: Omit<SupportCase, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => {
   const response = await axios.post<SupportCase>(`${API_BASE_URL}/cases`, caseData);
@@ -23,11 +8,17 @@ export const createSupportCase = async (caseData: Omit<SupportCase, 'id' | 'crea
 };
 
 export const getSupportCases = async (page: number = 1, limit: number = 10) => {
-  const response = await axios.get<ApiResponse<SupportCase[]>>(
-    `${API_BASE_URL}/cases?page=${page}&limit=${limit}`
+  const response = await axios.get<SupportCaseResponsePagination>(
+    `${API_BASE_URL}/support-cases/?page=${page}&size=${limit}`
   );
+  
   return {
-    cases: response.data.data,
-    totalPages: response.data.totalPages
+    cases: response.data.items,
+    totalPages: response.data.total_pages,
+    totalItems: response.data.total,
+    pageSize: response.data.page,
+    success: response.data.success,
+    message: response.data.message,
+
   };
 };

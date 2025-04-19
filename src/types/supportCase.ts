@@ -4,12 +4,22 @@ export interface SupportCase {
     description: string;
     status: 'open' | 'in-progress' | 'resolved' | 'closed';
     priority: 'low' | 'medium' | 'high';
-    createdAt: string;
-    updatedAt: string;
+    created_at: string;
+    updated_at: string;
   }
   
   export interface CreateSupportCaseDto {
     title: string;
     description: string;
-    priority: 'low' | 'medium' | 'high';
+    priority: 'baja' | 'media' | 'alta';
+  }
+  
+  export interface SupportCaseResponsePagination {
+    page: number;
+    size: number;
+    total: number;
+    success: boolean;
+    message: string;
+    items: SupportCase[];
+    total_pages: number;
   }
