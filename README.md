@@ -1,46 +1,113 @@
-# Getting Started with Create React App
+# Frontend de Gestión de Casos de Soporte
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Visión General
+Aplicación React con TypeScript para la gestión de casos de soporte. Proporciona interfaces para crear, visualizar y rastrear casos de manera eficiente.
 
-## Available Scripts
+## Configuración Inicial
+Clonar el repositorio
 
-In the project directory, you can run:
+```bash
+git clone [https://github.com/libardo2s/finkargo-support-backend.git]
+cd support-case-frontend
+```
 
-### `npm start`
+### Instalar dependencias
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```bash
+npm install
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### Configurar variables de entorno
+Crear un archivo .env basado en .env.example y definir las variables 
+```bash
+REACT_APP_API_BASE_URL=http://localhost:8000/api
+```
 
-### `npm test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Iniciar la aplicación
 
-### `npm run build`
+```bash
+npm start
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+La aplicación estará disponible en: http://localhost:3000.
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Estructura del Proyecto
+```plaintext
+src/
+├── components/          # Componentes reutilizables
+│   ├── forms/           # Formularios (crear/editar casos)
+│   ├── models/          # Modales/Diálogos
+│   ├── tables/          # Tablas de datos
+│   └── Navbar.tsx       # Barra de navegación
+│
+├── pages/               # Vistas principales
+│   ├── CreateCasePage.tsx       # Crear nuevo caso
+│   ├── SupportCaseDetailPage.tsx  # Detalles de un caso
+│   └── TrackingPage.tsx          # Rastreo de casos
+│
+├── services/            # Llamadas a la API
+│   └── apiClient.ts     # Cliente HTTP (Axios/Fetch)
+│
+├── types/               # Tipos TypeScript
+│   └── supportCase.ts   # Interfaces para casos de soporte
+│
+├── utils/               # Utilidades
+│   └── helpers.ts       # Funciones auxiliares
+│
+├── App.tsx              # Componente principal
+└── index.tsx            # Punto de entrada
+```
+### Scripts Disponibles
+#### Comando	Descripción
+```
+npm start  ---- Inicia la app en modo desarrollo.
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Integración con el Backend
+La aplicación consume los siguientes endpoints (ajustar en .env):
 
-### `npm run eject`
+#### Estructura de Endpoints
+```
+POST	/support-cases	Crear nuevo caso
+GET	/support-cases?[filters]	Obtener casos paginados (con filtros)
+GET	/support-cases/case/{id}	Obtener caso por ID
+```
+#### Ejemplo de Uso en Componentes
+```
+import { getSupportCases, createSupportCase } from '../services/supportService';
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+// Obtener casos
+const loadCases = async () => {
+  const { cases } = await getSupportCases({ 
+    page: 1, 
+    status: 'open' 
+  });
+  setCases(cases);
+};
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+// Crear caso
+const handleSubmit = async (formData) => {
+  try {
+    await createSupportCase(formData);
+    alert('Caso creado exitosamente');
+  } catch (error) {
+    console.error('Error al crear caso:', error);
+  }
+};
+``` 
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### Tecnologías Principales
+```
+React 18 (con Hooks)
+TypeScript (Tipado estático)
+React Router v6 (Navegación)
+Axios (Peticiones HTTP)
+Material-UI / Bootstrap (Estilos)
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-## Learn More
+### Notas Adicionales
+✅ Variables de Entorno:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+REACT_APP_API_URL: URL base del backend (ej: http://localhost:5000/api).
