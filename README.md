@@ -7,7 +7,7 @@ Aplicación React con TypeScript para la gestión de casos de soporte. Proporcio
 Clonar el repositorio
 
 ```bash
-git clone [https://github.com/libardo2s/finkargo-support-backend.git]
+git clone [https://github.com/libardo2s/finkargo-support-frontend.git]
 cd support-case-frontend
 ```
 
