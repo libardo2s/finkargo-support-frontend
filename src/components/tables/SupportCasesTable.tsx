@@ -2,9 +2,9 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Table, Button, Spinner, Form, Row, Col } from 'react-bootstrap';
 import { format, parseISO } from 'date-fns';
 import PaginationComponent from './Pagination';
-import SupportCaseDetails from '../modals/SupportCaseDetails';
 import { SupportCase } from '../../types/supportCase';
 import { CaseStatus, CasePriority } from '../../types/supportCase';
+import { useNavigate } from 'react-router-dom';
 
 interface SupportCasesTableProps {
   cases: SupportCase[];
@@ -73,6 +73,8 @@ export default function SupportCasesTable({
     endDate: ''
   });
 
+  const navigate = useNavigate();
+
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
@@ -94,10 +96,22 @@ export default function SupportCasesTable({
     }));
   };
 
-  useEffect(() => {
-    // Add debounce here if needed
+  const handleSearchClick = () => {
     onFilterChange(filters);
-  }, [filters, onFilterChange]);
+    onSearch();
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      id: '',
+      status: '',
+      priority: '',
+      startDate: '',
+      endDate: ''
+    });
+    onFilterChange({});
+    onSearch(); 
+  }
 
   const caseRows = useMemo(() => {
     return cases.map((supportCase) => (
@@ -129,7 +143,7 @@ export default function SupportCasesTable({
           <Button
             variant="outline-primary"
             size="sm"
-            onClick={() => handleShowDetails(supportCase)}
+            onClick={() => navigate(`/track-cases/${supportCase.id}`)}
             className="px-3"
           >
             <i className="bi bi-eye me-1"></i> Ver
@@ -165,10 +179,11 @@ export default function SupportCasesTable({
                 onChange={handleFilterChange}
               >
                 <option value="">Todos</option>
-                <option value="open">Abierto</option>
-                <option value="in-progress">En progreso</option>
-                <option value="resolved">Resuelto</option>
-                <option value="closed">Cerrado</option>
+                <option value={CaseStatus.PENDING}>Pendiente</option>
+                <option value={CaseStatus.ON_HOLD}>En Pausa</option>
+                <option value={CaseStatus.IN_PROGRESS}>En proceso</option>
+                <option value={CaseStatus.REJECTED}>Rechazado</option>
+                <option value={CaseStatus.COMPLETED}>Completado</option>
               </Form.Select>
             </Form.Group>
           </Col>
@@ -181,9 +196,9 @@ export default function SupportCasesTable({
                 onChange={handleFilterChange}
               >
                 <option value="">Todas</option>
-                <option value="low">Baja</option>
-                <option value="medium">Media</option>
-                <option value="high">Alta</option>
+                <option value={CasePriority.LOW}>Baja</option>
+                <option value={CasePriority.MEDIUM}>Media</option>
+                <option value={CasePriority.HIGH}>Alta</option>
               </Form.Select>
             </Form.Group>
           </Col>
@@ -213,15 +228,27 @@ export default function SupportCasesTable({
             </Form.Group>
           </Col>
           <Col md={2} className="d-flex align-items-end">
-            <Button
+          <Form.Group controlId="filterDateRange">
+          <Button
               variant="primary"
-              onClick={onSearch}
+              onClick={handleSearchClick}
               disabled={loading}
               className="w-100"
             >
               <i className="bi bi-search me-2"></i>
               Buscar
             </Button>
+            <Button
+              variant="primary"
+              onClick={handleClearFilters}
+              disabled={loading}
+              className="w-100 mt-2"
+            >
+              <i className="bi bi-search me-2"></i>
+              Limpiar Filtros
+            </Button>
+
+          </Form.Group>
           </Col>
         </Row>
       </div>
@@ -267,12 +294,6 @@ export default function SupportCasesTable({
           disabled={loading}
         />
       </div>
-
-      <SupportCaseDetails
-        show={showDetails}
-        onHide={handleCloseDetails}
-        supportCase={selectedCase}
-      />
     </div>
   );
 }

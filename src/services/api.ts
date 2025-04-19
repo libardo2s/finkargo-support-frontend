@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { SupportCase, SupportCaseResponsePagination, GetSupportCasesParams } from '../types/supportCase';
+import { SupportCase, SupportCaseResponsePagination, GetSupportCasesParams, SupportCaseResponse } from '../types/supportCase';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 export const createSupportCase = async (caseData: Omit<SupportCase, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => {
@@ -43,3 +43,8 @@ export const getSupportCases = async (params: GetSupportCasesParams = {}) => {
     message: response.data.message,
   };
 };
+
+export const getSupportCaseById = async (id: string) => {
+  const response = await axios.get<SupportCaseResponse>(`${API_BASE_URL}/support-cases/case/${id}`);
+  return response.data;
+}

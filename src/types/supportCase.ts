@@ -12,6 +12,12 @@ export interface SupportCase {
     sql_query: string
     executed_by: string
   }
+
+  export interface SupportCaseResponse {
+    success: boolean;
+    message: string;
+    case: SupportCase;
+  }
   
   export interface CreateSupportCaseDto {
     title: string;
