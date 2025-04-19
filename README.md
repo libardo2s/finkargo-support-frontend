@@ -8,7 +8,7 @@ Clonar el repositorio
 
 ```bash
 git clone [https://github.com/libardo2s/finkargo-support-frontend.git]
-cd support-case-frontend
+cd finkargo-support-frontend
 ```
 
 ### Instalar dependencias
