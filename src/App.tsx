@@ -1,25 +1,21 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import CreateCasePage from './pages/CreateCasePage';
+import TrackingPage from './pages/TrackingPage';
+import { Container } from 'react-bootstrap';
+import Navbar from './components/Navbar';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Navbar />
+      <Container className="my-4">
+        <Routes>
+          <Route path="/" element={<CreateCasePage />} />
+          <Route path="/create-case" element={<CreateCasePage />} />
+          <Route path="/track-cases" element={<TrackingPage />} />
+        </Routes>
+      </Container>
+    </Router>
   );
 }
 
