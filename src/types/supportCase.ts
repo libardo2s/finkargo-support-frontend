@@ -58,4 +58,16 @@ export interface SupportCase {
     start_date?: string;
     end_date?: string;
   }
+
+  export interface SupportCaseFormData {
+    title: string;
+    description: string;
+    priority: CasePriority;
+    status: CaseStatus;
+    database_name: string;
+    schema_name: string;
+    sql_query: string;
+    execution_result?: string;
+    executed_by?: string;
+  }
   

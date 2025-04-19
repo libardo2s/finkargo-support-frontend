@@ -39,7 +39,7 @@ export default function TrackingPage() {
       setTotalItems(data.totalItems);
     } catch (error) {
       console.error('Error fetching cases:', error);
-      setError('Failed to load support cases. Please try again later.');
+      setError('Error to obtener los casos de soporte. Por favor, inténtelo de nuevo más tarde.');
     } finally {
       setLoading(false);
     }
