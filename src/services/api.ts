@@ -1,9 +1,9 @@
 import axios from 'axios';
-import { SupportCase, SupportCaseResponsePagination, GetSupportCasesParams, SupportCaseResponse } from '../types/supportCase';
+import { SupportCase, SupportCaseResponsePagination, GetSupportCasesParams, SupportCaseResponse, SupportCaseFormData } from '../types/supportCase';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
-export const createSupportCase = async (caseData: Omit<SupportCase, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => {
-  const response = await axios.post<SupportCase>(`${API_BASE_URL}/cases`, caseData);
+export const createSupportCase = async (caseData: SupportCaseFormData) => {
+  const response = await axios.post<SupportCase>(`${API_BASE_URL}/support-cases`, caseData);
   return response.data;
 };
 
@@ -33,7 +33,7 @@ export const getSupportCases = async (params: GetSupportCasesParams = {}) => {
   const response = await axios.get<SupportCaseResponsePagination>(
     `${API_BASE_URL}/support-cases/?${queryParams.toString()}`
   );
-  
+
   return {
     cases: response.data.items,
     totalPages: response.data.total_pages,
